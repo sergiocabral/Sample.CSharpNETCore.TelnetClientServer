@@ -97,10 +97,13 @@ namespace TelnetServer
                 var process = Process.Start(ProcessStartInfoForCommand);
                 
                 var fromTcpClient = new Program(tcpClientStream, process?.StandardInput.BaseStream);
-                var toTcpClient = new Program(process?.StandardOutput.BaseStream, tcpClientStream);
+                var toTcpClientOutputDefault = new Program(process?.StandardOutput.BaseStream, tcpClientStream);
+                var toTcpClientOutputError = new Program(process?.StandardError.BaseStream, tcpClientStream);
                 fromTcpClient.BeginRead();
-                toTcpClient.BeginRead();
-                
+                toTcpClientOutputDefault.BeginRead();
+                toTcpClientOutputError.BeginRead();
+
+
                 Console.WriteLine("Connection from {0}", tcpClient.Client.RemoteEndPoint);
             }
         }
@@ -112,6 +115,7 @@ namespace TelnetServer
         {
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
+            RedirectStandardError = true,
             UseShellExecute = false
         };
     }
