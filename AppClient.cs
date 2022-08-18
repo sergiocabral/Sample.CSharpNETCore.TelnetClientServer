@@ -27,14 +27,18 @@ public class AppClient
         {
             _tcpClient.Connect(_hostname, _port);
 
-            // TODO: Falta direcionar entrada e saída do console local para o TcpClient.
-            
-            Console.WriteLine(new StreamReader(_tcpClient.GetStream()).ReadLine());
+            new PipeStream(_tcpClient.GetStream(), Console.OpenStandardOutput(), nameof(_tcpClient), nameof(Console.OpenStandardOutput)).BeginRead();
+            new PipeStream(Console.OpenStandardInput(), _tcpClient.GetStream(), nameof(Console.OpenStandardInput), nameof(_tcpClient)).BeginRead();
+
+            var originalConsoleOut = Console.Out;
+            Console.SetOut(TextWriter.Null);
 
             while (_tcpClient.Connected && (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Escape))
             {
                 Thread.Sleep(1);
             }
+
+            Console.SetOut(originalConsoleOut);
         }
         catch (Exception exception)
         {
