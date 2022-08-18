@@ -21,17 +21,27 @@ public class AppClient
 
     public void Start()
     {
-        Console.WriteLine($"I'm a client.");
-        
-        _tcpClient.Connect(_hostname, _port);
+        Console.WriteLine($"{LogPrefix} Starting and connecting.");
 
-        var writer = new StreamWriter(_tcpClient.GetStream());
-        writer.AutoFlush = true;
-        writer.WriteLine("Hello! I'm from client.");
+        try
+        {
+            _tcpClient.Connect(_hostname, _port);
 
-        var reader = new StreamReader(_tcpClient.GetStream());
-        Console.WriteLine(reader.ReadLine());
-        
-        _tcpClient.Close();
+            // TODO: Falta direcionar entrada e saída do console local para o TcpClient.
+            
+            Console.WriteLine(new StreamReader(_tcpClient.GetStream()).ReadLine());
+
+            while (_tcpClient.Connected && (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Escape))
+            {
+                Thread.Sleep(1);
+            }
+        }
+        catch (Exception exception)
+        {
+            Console.WriteLine($"{LogPrefix} Error when try to connect: {exception.Message}");
+        }
+
+        Console.WriteLine();
+        Console.WriteLine($"{LogPrefix} Terminated.");
     }
 }

@@ -27,18 +27,29 @@ public class AppServer
 
     public void Start()
     {
-        Console.WriteLine("I'm a SERVER.");
+        Console.WriteLine($"{LogPrefix} Starting. Press ESC to exit.");
         
         _tcpListener.Start();
-        var tcpClient = _tcpListener.AcceptTcpClient();
-
-        var writer = new StreamWriter(tcpClient.GetStream());
-        writer.AutoFlush = true;
-        writer.WriteLine("Hello! I'm from server.");
-
-        var reader = new StreamReader(tcpClient.GetStream());
-        Console.WriteLine(reader.ReadLine());
         
-        tcpClient.Close();
+        while (!Console.KeyAvailable || Console.ReadKey(true).Key != ConsoleKey.Escape)
+        {
+            if (_tcpListener.Pending())
+            {
+                Console.WriteLine($"{LogPrefix} Connection received.");
+                
+                var tcpClient = _tcpListener.AcceptTcpClient();
+                
+                // TODO: Falta executar o terminal e direcionar entrada e saída para o TcpClient.
+                // Process.Start(_processStartInfo);
+                new StreamWriter(tcpClient.GetStream()) { AutoFlush = true }.WriteLine("OUT OF SERVICE");
+
+                Console.WriteLine($"{LogPrefix} Closing.");
+                tcpClient.Close();
+            }
+            
+            Thread.Sleep(1);
+        }
+        
+        Console.WriteLine($"{LogPrefix} Terminated.");
     }
 }
